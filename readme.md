@@ -138,6 +138,3 @@ python-dotenv
 tenacity
 tqdm
 ```
-
-```
-```
