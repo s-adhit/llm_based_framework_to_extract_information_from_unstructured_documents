@@ -19,21 +19,17 @@ INPUT_FILE_PATH = "data/input_data.json"
 OUTPUT_FILE_PATH = "data/output_data.json"
 
 # Options: "zero_shot" or "few_shot" or "memory_prompt"
-PROMPTING_STRATEGY = "memory_prompt" 
+PROMPTING_STRATEGY = "few_shot" 
 MEMORY_SIZE = 15
 
 FEW_SHOT_EXAMPLES = [
-    {"text": "Harold Paul Freeman was born on March 2, 1933, in Washington, D.C. to Clyde and Lucille Thomas Freeman.", "category": "Background"},
-    {"text": "The family name \"Freeman\" was chosen by his great-great-grandfather who bought himself free from slavery on a North Carolina plantation.", "category": "Background"},
-    {"text": "He married in 2010 and has two kids.", "category": "Personal Life"},
-    {"text": "In 1978, he was received a Distinguished Alumni Achievement Award from Catholic University.", "category": "Achievements"},
-    {"text": "In 1992, he was inducted into the university's Athletes Hall of Fame.", "category": "Achievements"},
-    {"text": "Harold completed his high school education at Dunbar High School, then an academically elite but segregated institution in Washington, D.C.", "category": "Education"},
-    {"text": "He went on to study medicine at Howard University Medical School in Washington, D.C., also a historically Black school.", "category": "Education"},
-    {"text": "She also served briefly as an Army nurse.", "category": "Work Experience"},
-    {"text": "Bai's first major American film role was in The Crow (1994), where she played the half sister and lover of the main villain, Top Dollar.", "category": "Work Experience"},
-    {"text": "He is an avid mountaineer.", "category": "Interests"},
-    {"text": "The company faced a lawsuit.", "category": "Others"}
+    {"text": "Paglia was born in Endicott, New York, the eldest child of Lydia Anne (ne Colapietro) and Pasquale Paglia.", "category": "Background"},
+    {"text": "During her stays at a summer Girl Scout camp in Thendara, New York, she took on a variety of new names, including Anastasia (her confirmation name, inspired by the film Anastasia), Stacy, and Stanley.", "category": "Personal Life"},
+    {"text": "In 2005, Paglia was named as one of the top 100 public intellectuals by the journals Foreign Policy and Prospect.", "category": "Achievements"},
+    {"text": "She attended the Edward Smith Elementary School, T. Aaron Levy Junior High, and Nottingham Senior High School.", "category": "Education"},
+    {"text": "In September 1976, she gave a public lecture drawing on that dissertation, in which she discussed Edmund Spenser's The Faerie Queene, followed by remarks on Diana Ross, Gracie Allen, Yul Brynner, and Stphane Audran.", "category": "Work Experience"},
+    {"text": "She has expressed Interests in astrology and has written about it in several of her works, including Sexual Personae: \"I'm an astrologer  people don\'t mention this!", "category": "Interests"},
+    {"text": "Rollyson and Paddock note that Sontag \"had her lawyer put our publisher on notice\" when she realized she was to be the subject.", "category": "Others"}
 ]
 
 # Reverted to Title Case
