@@ -12,14 +12,14 @@ MODEL_NAME = "gemini-2.5-flash"
 
 # 200 items per batch = ~51 requests total for 10k items.
 # This leaves you ~200 requests buffer for retries/testing.
-BATCH_SIZE = 200
+BATCH_SIZE = 20
 
 # Paths
 INPUT_FILE_PATH = "data/input_data.json"
 OUTPUT_FILE_PATH = "data/output_data.json"
 
 # Options: "zero_shot" or "few_shot" or "memory_prompt"
-PROMPTING_STRATEGY = "few_shot" 
+PROMPTING_STRATEGY = "zero_shot" 
 MEMORY_SIZE = 15
 
 FEW_SHOT_EXAMPLES = [
@@ -41,4 +41,14 @@ CATEGORIES = [
     "Work Experience",
     "Interests",
     "Others"
+]
+
+DEFINITIONS = [
+    {"Background":"Early-life context such as birthplace, childhood environment, family circumstances, parents’ occupations, socioeconomic or cultural upbringing."},
+    {"Personal Life":"Private, non-professional matters including relationships, marriage, divorce, children, lifestyle, or household details."},
+    {"Achievements":"Formal recognitions, awards, honors, records, or institutionally granted distinctions."},
+    {"Education":"Schooling, university attendance, academic degrees, certifications, or structured training programs."},
+    {"Work Experience":"Professional roles, jobs, duties, leadership positions, organizational affiliations, or career-related contributions."},
+    {"Interests":"Hobbies, leisure activities, artistic pursuits, sports, or passions outside professional obligations."},
+    {"Others":"Anything that does not fit the categories above, including controversies, legal matters, political incidents, health issues, financial problems, rumors, or miscellaneous facts."}
 ]
