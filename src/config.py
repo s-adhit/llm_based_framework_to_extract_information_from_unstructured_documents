@@ -12,7 +12,7 @@ MODEL_NAME = "gemini-2.5-flash"
 
 # 200 items per batch = ~51 requests total for 10k items.
 # This leaves you ~200 requests buffer for retries/testing.
-BATCH_SIZE = 20
+BATCH_SIZE = 100
 
 # Paths
 INPUT_FILE_PATH = "data/input_data.json"
@@ -40,15 +40,19 @@ CATEGORIES = [
     "Education",
     "Work Experience",
     "Interests",
-    "Others"
+    "Influences",
+    "Insights",
+    "Others",
 ]
 
 DEFINITIONS = [
-    {"Background":"Early-life context such as birthplace, childhood environment, family circumstances, parents’ occupations, socioeconomic or cultural upbringing."},
-    {"Personal Life":"Private, non-professional matters including relationships, marriage, divorce, children, lifestyle, or household details."},
-    {"Achievements":"Formal recognitions, awards, honors, records, or institutionally granted distinctions."},
-    {"Education":"Schooling, university attendance, academic degrees, certifications, or structured training programs."},
-    {"Work Experience":"Professional roles, jobs, duties, leadership positions, organizational affiliations, or career-related contributions."},
+    {"Background":"This includes the individual's early socio-economic background, such as parents' occupations, childhood living conditions, caste, religion, and gender."},
+    {"Personal Life":"This captures the personal aspects of an individual's life, such as friends, spouses, children, marriage, and divorce."},
+    {"Achievements":"This category captures individuals' achievements, such as recognition for their work and awards."},
+    {"Education":"This includes details about the person, such as schools/colleges attended, educational decisions, grades, and extracurricular activities, such as music lessons."},
+    {"Work Experience":"This category captures details about an individual's professional career, specifically the positions they held, how long they worked at each, their contributions, efforts, decisions, and the impact of their work."},
     {"Interests":"Hobbies, leisure activities, artistic pursuits, sports, or passions outside professional obligations."},
-    {"Others":"Anything that does not fit the categories above, including controversies, legal matters, political incidents, health issues, financial problems, rumors, or miscellaneous facts."}
+    {"Influences":"This category captures internal influences (interests, concerns, worries,  aspirations) and external influences (support from others, inspiration, pressure, etc.)."},
+    {"Insights":"This captures the ideas, observations, and insights individuals gained throughout their lives."},
+    {"Others":"All other information not captured by the above classes."},
 ]
