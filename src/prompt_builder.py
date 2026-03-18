@@ -70,31 +70,32 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
 
     # 4. Construct Final Prompt
     prompt = f"""
-    Role: Data Annotation Expert.
+        Role: Data Annotation Expert.
 
-    Task:
-    Classify each of the {len(batch_items)} sentences into exactly ONE category.
-    {instruction_line}
+        Task:
+        Classify each of the {len(batch_items)} sentences based on **surface-level information**. 
+        Identify the most apparent category first. If a sentence clearly falls into multiple categories based on the visible text, include them as well.
+        {instruction_line}
 
-    Categories:
-    {category_list_str}
+        Categories:
+        {category_list_str}
 
-    Category Definitions:
-    {definitions_str}
-    {examples_str}
-    
-    Input JSON:
-    {json.dumps(input_data_for_llm, indent=2, ensure_ascii=False)}
+        Category Definitions:
+        {definitions_str}
+        {examples_str}
+        
+        Input JSON:
+        {json.dumps(input_data_for_llm, indent=2, ensure_ascii=False)}
 
-    Output Format (STRICT):
-    Return a JSON array of objects with these EXACT keys:
-    - "id": (copy the ID from the input)
-    - "c": (the chosen category name)
-    - "s": (confidence score as a float 0.0-1.0)
+        Output Format (STRICT):
+        Return a JSON array of objects with these EXACT keys:
+        - "id": (copy the ID from the input)
+        - "c": (a JSON list of strings. The first element must be the most apparent category)
 
-    Constraints:
-    - Return ONLY the JSON array. No preamble or conversational filler.
-    - Base classification strictly on the provided definitions.
-    """
+        Constraints:
+        - Return ONLY the JSON array. No preamble or conversational filler.
+        - Base classification strictly on the provided definitions and literal surface-level content.
+        - The "c" field must ALWAYS be a list, even if only one category is identified.
+        """
     
     return textwrap.dedent(prompt).strip()

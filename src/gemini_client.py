@@ -8,25 +8,32 @@ from src.config import API_KEY, MODEL_NAME, CATEGORIES
 
 client = genai.Client(api_key=API_KEY)
 
-# OPTIMIZED SCHEMA (Token Saving)
-# We use 'c' for class and 's' for score to save output tokens.
+# OPTIMIZED SCHEMA (Multi-label, Surface-level)
+# 'c' is now an ARRAY to support one or more labels.
+# 's' (confidence) has been removed as requested.
 RESPONSE_SCHEMA = {
     "type": "ARRAY",
     "items": {
         "type": "OBJECT",
         "properties": {
             "id": {"type": "INTEGER"},
-            "c": {"type": "STRING", "enum": CATEGORIES}, # Abbreviated 'class'
-            "s": {"type": "NUMBER"}                       # Abbreviated 'confidence_score'
+            "c": {
+                "type": "ARRAY", 
+                "items": {
+                    "type": "STRING", 
+                    "enum": CATEGORIES
+                },
+                "minItems": 1 # Ensures at least one label is always returned
+            }
         },
-        "required": ["id", "c", "s"]
+        "required": ["id", "c"]
     }
 }
 
 @retry(
     retry=retry_if_exception_type((ClientError, ServerError)),
-    stop=stop_after_attempt(5), # Reduce attempts to save quota
-    wait=wait_exponential(multiplier=4, min=15, max=60) # Increase wait time
+    stop=stop_after_attempt(5), 
+    wait=wait_exponential(multiplier=4, min=15, max=60)
 )
 def get_batch_classification(batch_items, prompt):
     try:
@@ -40,6 +47,7 @@ def get_batch_classification(batch_items, prompt):
             )
         )
         
+        # The SDK's 'parsed' attribute will now return a list of strings for 'c'
         if hasattr(response, 'parsed') and response.parsed is not None:
              return response.parsed
         
@@ -47,7 +55,6 @@ def get_batch_classification(batch_items, prompt):
 
     except Exception as e:
         print(f"Batch Error: {str(e)[:100]}...")
-        # If we hit a 429 (Rate Limit), we must ensure we don't retry too fast
         if "429" in str(e):
             print("Rate Limit Hit! Creating a long pause...")
         raise e

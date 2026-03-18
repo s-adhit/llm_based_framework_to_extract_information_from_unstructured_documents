@@ -8,7 +8,7 @@ if not API_KEY:
     raise ValueError("GOOGLE_API_KEY not found. Please set it in a .env file.")
 
 # Model Configuration
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3-flash-preview"
 
 # 200 items per batch = ~51 requests total for 10k items.
 # This leaves you ~200 requests buffer for retries/testing.
@@ -35,24 +35,22 @@ FEW_SHOT_EXAMPLES = [
 # Reverted to Title Case
 CATEGORIES = [
     "Background",
-    "Personal Life",
     "Achievements",
     "Education",
     "Work Experience",
     "Interests",
-    "Influences",
-    "Insights",
+    "Motivators",
+    "Reflections",
     "Others",
 ]
 
 DEFINITIONS = [
-    {"Background":"This includes the individual's early socio-economic background, such as parents' occupations, childhood living conditions, caste, religion, and gender."},
-    {"Personal Life":"This captures the personal aspects of an individual's life, such as friends, spouses, children, marriage, and divorce."},
-    {"Achievements":"This category captures individuals' achievements, such as recognition for their work and awards."},
-    {"Education":"This includes details about the person, such as schools/colleges attended, educational decisions, grades, and extracurricular activities, such as music lessons."},
-    {"Work Experience":"This category captures details about an individual's professional career, specifically the positions they held, how long they worked at each, their contributions, efforts, decisions, and the impact of their work."},
-    {"Interests":"Hobbies, leisure activities, artistic pursuits, sports, or passions outside professional obligations."},
-    {"Influences":"This category captures internal influences (interests, concerns, worries,  aspirations) and external influences (support from others, inspiration, pressure, etc.)."},
-    {"Insights":"This captures the ideas, observations, and insights individuals gained throughout their lives."},
-    {"Others":"All other information not captured by the above classes."},
+    {"Background":"This encompasses the individual's early socioeconomic circumstances (pre-adulthood), including parental occupations, family composition in childhood, living conditions during the formative years, and geographical location."},
+    {"Achievements":"This category documents individuals' accomplishments, including professional recognition and awards."},
+    {"Education":"This includes details of an individual's academic history, such as institutions attended, key educational decisions, and academic performance metrics (e.g., grades)."},
+    {"Work Experience":"This category encompasses details of an individual's professional history, including positions held, employment durations in each role, and the contributions, efforts, decisions, and impact of their work."},
+    {"Interests":"This category outlines individuals' recreational pursuits, proficiencies, and general interests."},
+    {"Motivators":"This category records external influences, such as support, inspiration, and environmental or interpersonal pressure, that affect the individual."},
+    {"Reflections":"This captures the ideological stances, personal philosophies, observations, and insights an individual has accumulated over their lifetime."},
+    {"Others":"All remaining information not classifiable under the aforementioned categories."},
 ]
