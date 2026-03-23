@@ -40,17 +40,17 @@ CATEGORIES = [
     "Work Experience",
     "Interests",
     "Motivators",
-    "Reflections",
+    "Learnings",
     "Others",
 ]
 
 DEFINITIONS = [
-    {"Background":"This encompasses the individual's early socioeconomic circumstances (pre-adulthood), including parental occupations, family composition in childhood, living conditions during the formative years, and geographical location."},
-    {"Achievements":"This category documents individuals' accomplishments, including professional recognition and awards."},
-    {"Education":"This includes details of an individual's academic history, such as institutions attended, key educational decisions, and academic performance metrics (e.g., grades)."},
-    {"Work Experience":"This category encompasses details of an individual's professional history, including positions held, employment durations in each role, and the contributions, efforts, decisions, and impact of their work."},
-    {"Interests":"This category outlines individuals' recreational pursuits, proficiencies, and general interests."},
-    {"Motivators":"This category records external influences, such as support, inspiration, and environmental or interpersonal pressure, that affect the individual."},
-    {"Reflections":"This captures the ideological stances, personal philosophies, observations, and insights an individual has accumulated over their lifetime."},
-    {"Others":"All remaining information not classifiable under the aforementioned categories."},
+    {"Background":"This captures the individual's place of birth and upbringing, family composition, parental occupations, and socioeconomic status, and the material conditions of childhood (considered till age 18). Information about siblings or extended family qualifies only when it directly shaped the subject's material circumstances or opportunities."},
+    {"Achievements":"This captures individuals' accomplishments, including professional recognition, honours, and awards. Achievements can also take the form of being the first to do something significant. The recognition must originate from outside the subject and be discrete."},
+    {"Education":"This includes details about an individual's academic history, such as institutions attended, significant educational choices (e.g., which degree to pursue), and academic performance metrics (e.g., grades and GPA). Vocational or professional training qualifies when it takes place within a formal institutional setting."},
+    {"Work Experience":"This captures a person's professional details, including job titles, tenure in each role, and key actions. It highlights the main outcomes or products of each position, such as laws drafted, performances delivered, music released, or campaigns led, provided they are central to the job's purpose. The subject must be the active agent. Includes professional decisions, outputs, and actions taken in a formal or semi-formal occupational capacity, even when no job title or duration is explicitly stated. Quantitative performance metrics (e.g., sales figures, sports statistics, publication counts) are also considered professional outputs."},
+    {"Interests":"This captures activities, pursuits, and skills the subject engaged with for personal pleasure or development, clearly within their leisure life-space and independent of professional obligations. Includes recreational habits, informal skill-building, cultural consumption, and creative pursuits. When a subject's hobby overlaps with their profession, the sentence qualifies here only if it describes the activity in a non-professional, non-compensated context."},
+    {"Motivators":"This captures external influences, such as mentors, peers, or major events that directly cause a documented change in someone's thinking or career, such as rethinking a field or starting something new. Internal motivations, unchanging situations, or minor interests that don’t lead to change are not included.  Both the external influence and its effect on the subject must be present in the sentence or its immediate context."},
+    {"Learnings":"This captures the professional insights and lessons an individual has acquired over their career. This category does not contain observations & judgements about other people. However, a sentence qualifies even if the insight references the behaviour of others, as long as the takeaway is about strategy, approach, or understanding rather than a personal judgment of a specific named individual."},
+    {"Others":"All remaining information not classifiable under the aforementioned categories. It typically captures information where the subject is a passive recipient of circumstances or a bystander to external events. Includes world history, descriptions of organizations, and personal life facts (like residence or family) that do not involve the subject making an active professional or intellectual choice. This is an exclusive class, i.e., you can not mark a sentence as both Others and a different class. Only choose this class if the sentence cannot be labeled in the above classes."},
 ]

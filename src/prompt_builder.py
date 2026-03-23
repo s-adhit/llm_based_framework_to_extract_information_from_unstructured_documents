@@ -73,7 +73,7 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
         Role: Data Annotation Expert.
 
         Task:
-        Classify each of the {len(batch_items)} sentences based on **surface-level information**. 
+        Classify each of the {len(batch_items)} sentences based on *surface-level information*. 
         Identify the most apparent category first. If a sentence clearly falls into multiple categories based on the visible text, include them as well.
         {instruction_line}
 
@@ -94,6 +94,7 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
 
         Constraints:
         - Return ONLY the JSON array. No preamble or conversational filler.
+        - *Exclusivity Rule:* The "Others" category is mutually exclusive. If a sentence is classified as "Others", the list MUST contain ONLY ["Others"]. Do not pair it with any other category.
         - Base classification strictly on the provided definitions and literal surface-level content.
         - The "c" field must ALWAYS be a list, even if only one category is identified.
         """
