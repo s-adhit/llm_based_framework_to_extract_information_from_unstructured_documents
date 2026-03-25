@@ -1,3 +1,4 @@
+#config.py
 import os
 from dotenv import load_dotenv
 
@@ -12,7 +13,7 @@ MODEL_NAME = "gemini-3-flash-preview"
 
 # 200 items per batch = ~51 requests total for 10k items.
 # This leaves you ~200 requests buffer for retries/testing.
-BATCH_SIZE = 100
+BATCH_SIZE = 30
 
 # Paths
 INPUT_FILE_PATH = "data/input_data.json"

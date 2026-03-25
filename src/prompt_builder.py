@@ -1,3 +1,4 @@
+#prompt_builder.py
 import json
 import textwrap
 from src.config import (
@@ -37,13 +38,13 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
     # Expected structure: item['data']['text'] and item['data']['meta']['sent_id']
     input_data_for_llm = []
     for item in batch_items:
+        # Get the 'data' block
         content = item.get('data', {})
+        
+        # FIX: Extract sent_id directly from 'data' (no 'meta')
+        id_val = content.get('sent_id')
         text_val = content.get('text', "Missing text")
-        meta = content.get('meta', {})
-        
-        # We use 'sent_id' as the ID so main.py can map it back easily
-        id_val = meta.get('sent_id', item.get('temp_id'))
-        
+
         input_data_for_llm.append({
             "id": id_val,
             "text": text_val

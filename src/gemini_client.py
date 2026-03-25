@@ -16,7 +16,7 @@ RESPONSE_SCHEMA = {
     "items": {
         "type": "OBJECT",
         "properties": {
-            "id": {"type": "INTEGER"},
+            "id": {"type": "STRING"},
             "c": {
                 "type": "ARRAY", 
                 "items": {
@@ -43,7 +43,8 @@ def get_batch_classification(batch_items, prompt):
             config=types.GenerateContentConfig(
                 temperature=0.0,
                 response_mime_type="application/json",
-                response_schema=RESPONSE_SCHEMA
+                response_schema=RESPONSE_SCHEMA,
+                http_options={'timeout': 600000}
             )
         )
         
