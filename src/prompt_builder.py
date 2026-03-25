@@ -69,14 +69,18 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
     category_list_str = "\n".join([f"- {c}" for c in CATEGORIES])
     definitions_str = format_definitions(DEFINITIONS)
 
-    # 4. Construct Final Prompt
+    # 4. Construct Final Prompt with your specific conditions
     prompt = f"""
         Role: Data Annotation Expert.
 
         Task:
-        Classify each of the {len(batch_items)} sentences based on *surface-level information*. 
-        Identify the most apparent category first. If a sentence clearly falls into multiple categories based on the visible text, include them as well.
-        {instruction_line}
+        Classify each of the {len(batch_items)} sentences based on the following specific logical flow:
+        
+        1. **Active Agent Check:** First, determine if the subject is the **active agent** in the sentence. If the subject is NOT the active agent (e.g., they are a passive recipient or bystander), the sentence MUST be marked as ["Others"].
+        2. **Clause Breakdown:** If the subject IS the active agent, break the sentence down into its constituent clauses.
+        3. **Clause Classification:** For each clause, select the appropriate category based ONLY on surface-level information (no implications).
+        4. **Aggregation:** - If ANY clause qualifies for a specific category (Background, Achievements, etc.), include that category in the result list.
+           - Mark the sentence as ["Others"] ONLY if ALL clauses in the sentence belong to the "Others" category.
 
         Categories:
         {category_list_str}
@@ -89,15 +93,15 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
         {json.dumps(input_data_for_llm, indent=2, ensure_ascii=False)}
 
         Output Format (STRICT):
-        Return a JSON array of objects with these EXACT keys:
+        Return a JSON array of objects with:
         - "id": (copy the ID from the input)
         - "c": (a JSON list of strings. The first element must be the most apparent category)
 
         Constraints:
-        - Return ONLY the JSON array. No preamble or conversational filler.
-        - *Exclusivity Rule:* The "Others" category is mutually exclusive. If a sentence is classified as "Others", the list MUST contain ONLY ["Others"]. Do not pair it with any other category.
-        - Base classification strictly on the provided definitions and literal surface-level content.
-        - The "c" field must ALWAYS be a list, even if only one category is identified.
+        - Return ONLY the JSON array.
+        - **Surface-Level Only:** Do not use internal logic or implications. If the text doesn't explicitly state it, don't label it.
+        - **Exclusivity Rule:** The "Others" category is mutually exclusive. If a sentence is "Others", the list MUST contain ONLY ["Others"].
+        - Do not include tables or formatting in your classification logic.
         """
     
     return textwrap.dedent(prompt).strip()
