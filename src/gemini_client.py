@@ -41,7 +41,7 @@ def get_batch_classification(batch_items, prompt):
             model=MODEL_NAME,
             contents=prompt,
             config=types.GenerateContentConfig(
-                temperature=0.0,
+                # temperature=0.0,
                 response_mime_type="application/json",
                 response_schema=RESPONSE_SCHEMA,
                 http_options={'timeout': 600000}
