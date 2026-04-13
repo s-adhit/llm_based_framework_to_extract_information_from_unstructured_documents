@@ -69,39 +69,26 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
     category_list_str = "\n".join([f"- {c}" for c in CATEGORIES])
     definitions_str = format_definitions(DEFINITIONS)
 
-    # 4. Construct Final Prompt with your specific conditions
-    prompt = f"""
-        Role: Data Annotation Expert.
+    prompt = f"""You are a data annotation expert. Classify each sentence below.
 
-        Task:
-        Classify each of the {len(batch_items)} sentences based on the following specific logical flow:
-        
-        1. **Active Agent Check:** First, determine if the subject is the **active agent** in the sentence. If the subject is NOT the active agent (e.g., they are a passive recipient or bystander), the sentence MUST be marked as ["Others"].
-        2. **Clause Breakdown:** If the subject IS the active agent, break the sentence down into its constituent clauses.
-        3. **Clause Classification:** For each clause, select the appropriate category based ONLY on surface-level information (no implications).
-        4. **Aggregation:** - If ANY clause qualifies for a specific category (Background, Achievements, etc.), include that category in the result list.
-           - Mark the sentence as ["Others"] ONLY if ALL clauses in the sentence belong to the "Others" category.
+        DECISION FLOW:
+        1. Subject test: Remove the subject — does the sentence still make complete sense? If yes → ["Others"]. Stop.
+        2. Clause split: Split on conjunctions/semicolons. For each clause, check if PoI is the active focus.
+        3. Label each clause using definitions below. Surface-level only — no inferences.
+        4. Aggregate: Include any category where ≥1 clause qualifies. ["Others"] only if ALL clauses are Others. Others is mutually exclusive.
 
-        Categories:
+        CATEGORIES & DEFINITIONS:
         {category_list_str}
-
-        Category Definitions:
         {definitions_str}
         {examples_str}
-        
-        Input JSON:
+
+        INPUT:
         {json.dumps(input_data_for_llm, indent=2, ensure_ascii=False)}
 
-        Output Format (STRICT):
-        Return a JSON array of objects with:
+        OUTPUT (STRICT) — return ONLY a JSON array of objects:
         - "id": (copy the ID from the input)
-        - "c": (a JSON list of strings. The first element must be the most apparent category)
+        - "c": (a JSON list of strings; first element must be the most apparent category)
 
-        Constraints:
-        - Return ONLY the JSON array.
-        - **Surface-Level Only:** Do not use internal logic or implications. If the text doesn't explicitly state it, don't label it.
-        - **Exclusivity Rule:** The "Others" category is mutually exclusive. If a sentence is "Others", the list MUST contain ONLY ["Others"].
-        - Do not include tables or formatting in your classification logic.
-        """
+        Rules: Others cannot combine with any other label. No markdown. No explanation."""
     
     return textwrap.dedent(prompt).strip()
