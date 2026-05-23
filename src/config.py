@@ -19,8 +19,8 @@ BATCH_SIZE = 30
 INPUT_FILE_PATH = "data/input_data.json"
 OUTPUT_FILE_PATH = "data/output_data.json"
 
-# Options: "zero_shot" | "few_shot" | "memory_prompt" | "zero_shot_cot" | "few_shot_cot"
-PROMPTING_STRATEGY = "zero_shot_cot"
+# Options: "zero_shot" | "few_shot" | "zero_shot_cot" | "few_shot_cot"
+PROMPTING_STRATEGY = "few_shot_cot"
 MEMORY_SIZE = 15
 
 FEW_SHOT_EXAMPLES = [

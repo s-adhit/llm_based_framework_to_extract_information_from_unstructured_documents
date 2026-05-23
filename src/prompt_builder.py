@@ -53,7 +53,11 @@ def format_definitions(definitions_list):
     return def_str
 
 
-def build_batch_classification_prompt(batch_items, dynamic_memory=None):
+def build_batch_classification_prompt(batch_items, previous_sentence=None):
+    """
+    previous_sentence: the raw text of the sentence immediately before this
+                       batch's first sentence. Used as context only — no label.
+    """
     # 1. Extract input sentences
     input_data_for_llm = []
     for item in batch_items:
@@ -67,28 +71,24 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
     effective_strategy = _BASE_STRATEGY.get(PROMPTING_STRATEGY, PROMPTING_STRATEGY)
 
     # 3. Build examples block
-    examples_str     = ""
-    instruction_line = "Classify based on the provided category definitions."
-
+    examples_str = ""
     if effective_strategy == "few_shot":
-        examples_str     = format_examples(
+        examples_str = format_examples(
             FEW_SHOT_EXAMPLES,
             "Reference Examples",
             include_reasoning=is_cot
         )
-        instruction_line = "Classify based on the provided definitions and reference examples."
 
-    elif effective_strategy == "memory_prompt" and dynamic_memory:
-        examples_str     = format_examples(dynamic_memory, "Recent Annotations (Memory)")
-        instruction_line = (
-            f"Classify based on definitions and the last {len(dynamic_memory)} "
-            "successful annotations. Emulate the logic of these recent examples."
-        )
+    # 4. Previous sentence context block (all modes)
+    if previous_sentence:
+        context_block = f"\nPREVIOUS SENTENCE (context only — do not classify):\n\"{previous_sentence}\"\n"
+    else:
+        context_block = ""
 
-    # 4. CoT block (empty string when not active)
+    # 5. CoT block (empty string when not active)
     cot_block = f"\n{_COT_INSTRUCTION}\n" if is_cot else ""
 
-    # 5. Assemble prompt
+    # 6. Assemble prompt
     category_list_str = "\n".join([f"- {c}" for c in CATEGORIES])
     definitions_str   = format_definitions(DEFINITIONS)
 
@@ -103,7 +103,7 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
         CATEGORIES & DEFINITIONS:
         {category_list_str}
         {definitions_str}
-        {examples_str}{cot_block}
+        {examples_str}{context_block}{cot_block}
         INPUT:
         {json.dumps(input_data_for_llm, indent=2, ensure_ascii=False)}
 
