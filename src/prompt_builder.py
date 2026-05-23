@@ -2,72 +2,95 @@
 import json
 import textwrap
 from src.config import (
-    PROMPTING_STRATEGY, 
-    FEW_SHOT_EXAMPLES, 
-    CATEGORIES, 
+    PROMPTING_STRATEGY,
+    FEW_SHOT_EXAMPLES,
+    CATEGORIES,
     DEFINITIONS
 )
 
-def format_examples(examples, title):
-    """Helper to format examples into a clear string for the LLM."""
+_COT_STRATEGIES = {"zero_shot_cot", "few_shot_cot"}
+_BASE_STRATEGY = {
+    "zero_shot_cot": "zero_shot",
+    "few_shot_cot":  "few_shot",
+}
+
+_COT_INSTRUCTION = """THINK STEP BY STEP before producing your answer:
+  1. Apply the Subject Test to each sentence.
+  2. Split clauses; check the PoI's role in each.
+  3. Match each clause to a definition.
+  4. Determine the final label(s).
+Your final output must still be ONLY the JSON array with "id" and "c". No reasoning text."""
+
+
+def format_examples(examples, title, include_reasoning=False):
     if not examples:
         return ""
-        
+
     formatted = f"\n{title}:\n"
     for ex in examples:
-        # Check 'category' (static config) or 'c' (dynamic memory/schema)
-        category = ex.get('category') or ex.get('c')
-        text = ex.get('text', "No text provided")
-        formatted += f"Text: \"{text}\"\nCategory: {category}\n---\n"
+        if include_reasoning:
+            input_block  = json.dumps(ex.get('input',  []), ensure_ascii=False)
+            output_block = json.dumps(ex.get('output', []), ensure_ascii=False)
+            reasoning    = ex.get('reasoning', '')
+            formatted += (
+                f"Input:     {input_block}\n"
+                f"Reasoning: {reasoning}\n"
+                f"Output:    {output_block}\n---\n"
+            )
+        else:
+            category = ex.get('category') or ex.get('c')
+            text     = ex.get('text', "No text provided")
+            formatted += f"Text: \"{text}\"\nCategory: {category}\n---\n"
+
     return formatted
 
+
 def format_definitions(definitions_list):
-    """Converts the list of dicts from config into a clean bulleted list."""
     def_str = ""
     for d in definitions_list:
         for cat, desc in d.items():
             def_str += f"- {cat}: {desc}\n"
     return def_str
 
-def build_batch_classification_prompt(batch_items, dynamic_memory=None):
-    """
-    Constructs the classification prompt using the nested data structure.
-    """
 
-    # 1. Extract data from the nested JSON structure
-    # Expected structure: item['data']['text'] and item['data']['meta']['sent_id']
+def build_batch_classification_prompt(batch_items, dynamic_memory=None):
+    # 1. Extract input sentences
     input_data_for_llm = []
     for item in batch_items:
-        # Get the 'data' block
-        content = item.get('data', {})
-        
-        # FIX: Extract sent_id directly from 'data' (no 'meta')
-        id_val = content.get('sent_id')
+        content  = item.get('data', {})
+        id_val   = content.get('sent_id')
         text_val = content.get('text', "Missing text")
+        input_data_for_llm.append({"id": id_val, "text": text_val})
 
-        input_data_for_llm.append({
-            "id": id_val,
-            "text": text_val
-        })
+    # 2. Resolve effective strategy and CoT flag
+    is_cot             = PROMPTING_STRATEGY in _COT_STRATEGIES
+    effective_strategy = _BASE_STRATEGY.get(PROMPTING_STRATEGY, PROMPTING_STRATEGY)
 
-    # 2. Determine Strategy Instructions
-    examples_str = ""
+    # 3. Build examples block
+    examples_str     = ""
     instruction_line = "Classify based on the provided category definitions."
 
-    if PROMPTING_STRATEGY == "few_shot":
-        examples_str = format_examples(FEW_SHOT_EXAMPLES, "Reference Examples")
+    if effective_strategy == "few_shot":
+        examples_str     = format_examples(
+            FEW_SHOT_EXAMPLES,
+            "Reference Examples",
+            include_reasoning=is_cot
+        )
         instruction_line = "Classify based on the provided definitions and reference examples."
 
-    elif PROMPTING_STRATEGY == "memory_prompt" and dynamic_memory:
-        examples_str = format_examples(dynamic_memory, "Recent Annotations (Memory)")
+    elif effective_strategy == "memory_prompt" and dynamic_memory:
+        examples_str     = format_examples(dynamic_memory, "Recent Annotations (Memory)")
         instruction_line = (
             f"Classify based on definitions and the last {len(dynamic_memory)} "
             "successful annotations. Emulate the logic of these recent examples."
         )
 
-    # 3. Format Categories and Definitions from Config
+    # 4. CoT block (empty string when not active)
+    cot_block = f"\n{_COT_INSTRUCTION}\n" if is_cot else ""
+
+    # 5. Assemble prompt
     category_list_str = "\n".join([f"- {c}" for c in CATEGORIES])
-    definitions_str = format_definitions(DEFINITIONS)
+    definitions_str   = format_definitions(DEFINITIONS)
 
     prompt = f"""You are a data annotation expert. Classify each sentence below.
 
@@ -80,8 +103,7 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
         CATEGORIES & DEFINITIONS:
         {category_list_str}
         {definitions_str}
-        {examples_str}
-
+        {examples_str}{cot_block}
         INPUT:
         {json.dumps(input_data_for_llm, indent=2, ensure_ascii=False)}
 
@@ -90,5 +112,5 @@ def build_batch_classification_prompt(batch_items, dynamic_memory=None):
         - "c": (a JSON list of strings; first element must be the most apparent category)
 
         Rules: Others cannot combine with any other label. No markdown. No explanation."""
-    
+
     return textwrap.dedent(prompt).strip()

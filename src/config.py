@@ -19,74 +19,36 @@ BATCH_SIZE = 30
 INPUT_FILE_PATH = "data/input_data.json"
 OUTPUT_FILE_PATH = "data/output_data.json"
 
-# Options: "zero_shot" or "few_shot" or "memory_prompt"
-PROMPTING_STRATEGY = "few_shot" 
+# Options: "zero_shot" | "few_shot" | "memory_prompt" | "zero_shot_cot" | "few_shot_cot"
+PROMPTING_STRATEGY = "zero_shot_cot"
 MEMORY_SIZE = 15
 
 FEW_SHOT_EXAMPLES = [
-    {"input": [{"id": "s1", "text": "She was Professor of Physics at the Open University from 1991 to 2001."}],
-     "output": [{"id": "s1", "c": ["Work Experience"]}],
-     "reasoning": "Specific job title at a named institution with explicit tenure dates."},
+    {"input": [{"id": "s1", "text": "Raised in the Church of the Nazarene (which he ultimately left in 1968), he won a scholarship to the Church-affiliated Bethany Nazarene College (now Southern Nazarene University) in Bethany, Oklahoma, in 1954 and graduated with a B.A. in philosophy in 1958. "}],
+     "output": [{"id": "s1", "c": ["Background", "Education"]}],
+     "reasoning": "The sentence mentions the PoI, passing the subject test. It contains three key details: his upbringing in the Church of the Nazarene (Background), a scholarship to Southern Nazarene University (Education), and a B.A. in philosophy (Education). Therefore, the final labels are Background and Education."},
 
-    {"input": [{"id": "s2", "text": "Levin endorsed Orrin Hatch when Levin was being sponsored by Americans for Prosperity (AFP) which also endorsed Hatch."}],
-     "output": [{"id": "s2", "c": ["Work Experience"]}],
-     "reasoning": "Levin is the active agent performing a professional action (endorsement) tied to a formal sponsorship — a substantive output of his advocacy role."},
+    {"input": [{"id": "s2", "text": "The music video for the song was released on December 11, 2012."}],
+     "output": [{"id": "s2", "c": ["Others"]}],
+     "reasoning": "Since the sentence does not mention PoI at all, it fails the subject test and is therefore labeled as Others."},
 
-    {"input": [{"id": "s3", "text": "In 2019, she was awarded an Honorary Doctorate of Laws from the University of Bath."}],
-     "output": [{"id": "s3", "c": ["Achievements"]}],
-     "reasoning": "Formal award bestowed by an external institution."},
+    {"input": [{"id": "s3", "text": "On February 27, 2022, he unilaterally terminated the contract with Zenit, citing Russia's aggression on Ukraine as the reason."}],
+     "output": [{"id": "s3", "c": ["Work Experience", "Motivator"]}],
+     "reasoning": "The sentence mentions the PoI, passing the subject test. It contains two pieces of information: he actively terminates his contract with Zenit (Work Experience) and does so due to Russia's aggression on Ukraine (Motivator). Therefore, the final labels are Work Experience and Motivator."},
+     
 
-    {"input": [{"id": "s4", "text": "In 2020, she was included by the BBC in a list of seven important but little-known British female scientists."}],
-     "output": [{"id": "s4", "c": ["Achievements"]}],
-     "reasoning": "External organization formally recognized the individual's significance."},
+    {"input": [{"id": "s5", "text": "Ma's initial practical training in advertising fostered in her \"a production and design aesthetic in the sense that she is responsive to the qualities and needs of materials as well as to the demands of place and public,\" while remaining critical of market and client."}],
+     "output": [{"id": "s5", "c": ["Learnings"]}],
+     "reasoning": "The sentence mentions the PoI (Ma), passing the subject test. It explains how her initial training in advertising shaped her design aesthetic, responsiveness to materials, and critical perspective on the market. Because this focuses entirely on the skills, perspectives, and insights she acquired during her training, it is labeled Learnings."},
 
-    {"input": [{"id": "s5", "text": "There she was favourably impressed by her physics teacher, Mr. Tillott, and stated: You do not have to learn lots and lots ... of facts; you just learn a few key things, and ... then you can apply and build and develop from those ... He was a really good teacher and showed me, actually, how easy physics was."}],
-     "output": [{"id": "s5", "c": ["Motivators"]}],
-     "reasoning": "External influence (teacher) and its resulting effect on subject's perspective are both explicitly stated."},
+    {"input": [{"id": "s6", "text": "He has frequently worked with filmmaker Wes Anderson, with whom he has shared writing and acting credits on the films Bottle Rocket (1996), Rushmore (1998), and The Royal Tenenbaums (2001) ”the latter received a nomination for the Academy Award and BAFTA Award for Best Screenplay."}],
+     "output": [{"id": "s6", "c": ["Work Experience", "Achievements"]}],
+     "reasoning": "The sentence mentions the PoI, passing the subject test. It highlights two main components: his extensive collaborative filmmaking, writing, and acting credits with Wes Anderson (Work Experience), and the subsequent Academy Award and BAFTA nominations for Best Screenplay (Achievements). Therefore, the final labels are Work Experience and Achievements."},
 
-    {"input": [{"id": "s6", "text": "Matsuo said that before Senko Riot, adults in her hometown would laugh at her when she told them she wanted to make a living in music, but the other acts she met there showed her it was not a pipe dream and she decided to move to Tokyo to make her dream a reality."}],
-     "output": [{"id": "s6", "c": ["Motivators"]}],
-     "reasoning": "External influence (other acts) caused a documented career decision (moving to Tokyo) — both influence and outcome are explicit."},
-
-    {"input": [{"id": "s7", "text": "She also enjoyed her father's books on astronomy."}],
+    {"input": [{"id": "s7", "text": "After moving from Beijing to Oklahoma, Ma started drawing and painting as an alternative to literature, from which she felt alienated having to speak a second language."}],
      "output": [{"id": "s7", "c": ["Interests"]}],
-     "reasoning": "Recreational activity outside any formal or professional obligation."},
+     "reasoning": "The sentence mentions the PoI (Ma), passing the subject test. It notes that after moving to Oklahoma, she picked up drawing and painting as a creative outlet due to feeling alienated from literature in a second language. Since this focuses on her pursuing these creative activities, it is labeled Interests."},
 
-    {"input": [{"id": "s8", "text": "This saw her fall in love with classic rock, and she started listening to The Beatles and Led Zeppelin and watching Woodstock DVDs."}],
-     "output": [{"id": "s8", "c": ["Interests"]}],
-     "reasoning": "Leisure activities with no professional obligation or output."},
-
-    {"input": [{"id": "s9", "text": "She grew up in Lurgan and attended the Preparatory Department of Lurgan College from 1948 to 1956."}],
-     "output": [{"id": "s9", "c": ["Education"]}],
-     "reasoning": "Named institution with enrollment period. 'Grew up' is Background but Education dominates."},
-
-    {"input": [{"id": "s10", "text": "Raised in the Church of the Nazarene (which he ultimately left in 1968), he won a scholarship to the Church-affiliated Bethany Nazarene College (now Southern Nazarene University) in Bethany, Oklahoma, in 1954 and graduated with a B.A. in philosophy in 1958."}],
-     "output": [{"id": "s10", "c": ["Education"]}],
-     "reasoning": "Scholarship and degree at a named institution — both Education signals. Religious upbringing is contextual Background but Education dominates."},
-
-    {"input": [{"id": "s11", "text": "Bell Burnell was born in Lurgan, County Armagh, Northern Ireland, to M. Allison and G. Philip Bell."}],
-     "output": [{"id": "s11", "c": ["Background"]}],
-     "reasoning": "Birth location and parental names — foundational Background facts."},
-
-    {"input": [{"id": "s12", "text": "Hart was born in Ottawa, Kansas, the son of Nina (née Pritchard) and Carl Riley Hartpence, a farm equipment salesman."}],
-     "output": [{"id": "s12", "c": ["Background"]}],
-     "reasoning": "Birthplace, family composition, and parental occupation describing the socioeconomic context of childhood."},
-
-    {"input": [{"id": "s13", "text": "She realized she could achieve this by starting a band; she could sing songs, design the album covers, and merchandise."}],
-     "output": [{"id": "s13", "c": ["Learnings"]}],
-     "reasoning": "Subject draws an explicit strategic conclusion framed as a personal insight, not an event description."},
-
-    {"input": [{"id": "s14", "text": "He maintained that treating the shares of a company like baseball cards is a losing strategy because it requires one to predict the behavior of often irrational and emotional human beings."}],
-     "output": [{"id": "s14", "c": ["Learnings"]}],
-     "reasoning": "Subject states a concluded professional insight framed as a takeaway ('maintained that'), not an event."},
-
-    {"input": [{"id": "s15", "text": "This race for the nomination was the most recent occasion that a major party's presidential nomination has gone all the way to the convention."}],
-     "output": [{"id": "s15", "c": ["Others"]}],
-     "reasoning": "Subject test: PoI absent — historical fact about an event, not about the individual."},
-
-    {"input": [{"id": "s16", "text": "The Daily Telegraph science reporter shortened 'pulsating radio source' to pulsar."}],
-     "output": [{"id": "s16", "c": ["Others"]}],
-     "reasoning": "Third-party action with PoI entirely absent — passes subject test → Others."},
 ]
 
 # Reverted to Title Case
