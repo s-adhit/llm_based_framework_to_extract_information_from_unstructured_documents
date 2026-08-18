@@ -8,34 +8,36 @@ from src.config import API_KEY, MODEL_NAME, CATEGORIES
 
 client = genai.Client(api_key=API_KEY)
 
-# OPTIMIZED SCHEMA (Multi-label, Surface-level)
-# 'c' is now an ARRAY to support one or more labels.
-# 's' (confidence) has been removed as requested.
-RESPONSE_SCHEMA = {
-    "type": "ARRAY",
-    "items": {
-        "type": "OBJECT",
-        "properties": {
-            "id": {"type": "STRING"},
-            "c": {
-                "type": "ARRAY", 
-                "items": {
-                    "type": "STRING", 
-                    "enum": CATEGORIES
-                },
-                "minItems": 1 # Ensures at least one label is always returned
-            }
-        },
-        "required": ["id", "c"]
+def build_response_schema(categories_list=None):
+    target_cats = categories_list if categories_list is not None else CATEGORIES
+    return {
+        "type": "ARRAY",
+        "items": {
+            "type": "OBJECT",
+            "properties": {
+                "id": {"type": "STRING"},
+                "c": {
+                    "type": "ARRAY", 
+                    "items": {
+                        "type": "STRING", 
+                        "enum": target_cats
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["id", "c"]
+        }
     }
-}
+
+RESPONSE_SCHEMA = build_response_schema()
 
 @retry(
     retry=retry_if_exception_type((ClientError, ServerError)),
     stop=stop_after_attempt(5), 
     wait=wait_exponential(multiplier=4, min=15, max=60)
 )
-def get_batch_classification(batch_items, prompt):
+def get_batch_classification(batch_items, prompt, categories=None):
+    schema = build_response_schema(categories) if categories is not None else RESPONSE_SCHEMA
     try:
         response = client.models.generate_content(
             model=MODEL_NAME,
@@ -43,7 +45,7 @@ def get_batch_classification(batch_items, prompt):
             config=types.GenerateContentConfig(
                 # temperature=0.0,
                 response_mime_type="application/json",
-                response_schema=RESPONSE_SCHEMA,
+                response_schema=schema,
                 http_options={'timeout': 600000}
             )
         )

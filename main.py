@@ -91,7 +91,7 @@ def main():
                     data[item['temp_id']]['data']['category'] = ["Batch_Error"]
             save_json(data, OUTPUT_FILE_PATH)
 
-        time.sleep(1.0)
+        time.sleep(0.5)
 
     print(f"Pipeline complete! Results saved to {OUTPUT_FILE_PATH}")
 

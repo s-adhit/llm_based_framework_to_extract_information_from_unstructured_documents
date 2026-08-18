@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import csv
 from collections import deque
 from src.config import MEMORY_SIZE
 
@@ -57,3 +58,47 @@ def save_json(data, filepath):
         json.dump(data, f, indent=2, ensure_ascii=False)
     
     shutil.move(temp_path, filepath)
+
+def load_contrastive_examples(filepath):
+    """
+    Loads contrastive examples from CSV file.
+    Converts conflict pairs into structured examples format for CRWiki strategy.
+    
+    Expected CSV columns:
+    - conflict_pair: "Category1 ↔ Category2"
+    - true_class: The correct category
+    - confused_with: The category it might be confused with
+    - text: The example sentence
+    - rationale_belongs: Why it belongs to true_class
+    - rationale_not_confused: Why it doesn't belong to confused_with
+    """
+    if not os.path.exists(filepath):
+        print(f"Contrastive examples file not found: {filepath}")
+        return []
+    
+    contrastive_examples = []
+    
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if not row.get('text') or not row.get('true_class'):
+                    continue
+                
+                # Create a contrastive example that shows the difference
+                example = {
+                    "conflict_pair": row.get('conflict_pair', ''),
+                    "true_class": row.get('true_class', ''),
+                    "confused_with": row.get('confused_with', ''),
+                    "text": row.get('text', ''),
+                    "rationale_correct": row.get('rationale_belongs', ''),
+                    "rationale_incorrect": row.get('rationale_not_confused', '')
+                }
+                contrastive_examples.append(example)
+        
+        print(f"Loaded {len(contrastive_examples)} contrastive examples from {filepath}")
+        return contrastive_examples
+    
+    except Exception as e:
+        print(f"Error loading contrastive examples from {filepath}: {e}")
+        return []

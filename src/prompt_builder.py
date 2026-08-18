@@ -4,14 +4,16 @@ import textwrap
 from src.config import (
     PROMPTING_STRATEGY,
     FEW_SHOT_EXAMPLES,
+    CONTRASTIVE_EXAMPLES,
     CATEGORIES,
     DEFINITIONS
 )
 
-_COT_STRATEGIES = {"zero_shot_cot", "few_shot_cot"}
+_COT_STRATEGIES = {"zero_shot_cot", "few_shot_cot","crwiki"}
 _BASE_STRATEGY = {
     "zero_shot_cot": "zero_shot",
     "few_shot_cot":  "few_shot",
+    "crwiki":        "crwiki",
 }
 
 _COT_INSTRUCTION = """THINK STEP BY STEP before producing your answer:
@@ -45,6 +47,34 @@ def format_examples(examples, title, include_reasoning=False):
     return formatted
 
 
+def format_contrastive_examples(examples, title="Contrastive Examples"):
+    """
+    Formats contrastive examples that show the difference between similar categories.
+    Each example shows why a sentence belongs to one category vs. another.
+    """
+    if not examples:
+        return ""
+
+    formatted = f"\n{title} (showing confusable category pairs):\n"
+    for ex in examples:
+        conflict_pair = ex.get('conflict_pair', '')
+        true_class = ex.get('true_class', '')
+        confused_with = ex.get('confused_with', '')
+        text = ex.get('text', '')
+        rationale_correct = ex.get('rationale_correct', '')
+        rationale_incorrect = ex.get('rationale_incorrect', '')
+        
+        formatted += f"\nConflict: {conflict_pair}\n"
+        formatted += f"Text: \"{text}\"\n"
+        formatted += f"Correct Category: {true_class}\n"
+        formatted += f"  Why: {rationale_correct}\n"
+        formatted += f"NOT '{confused_with}' because:\n"
+        formatted += f"  {rationale_incorrect}\n"
+        formatted += "---\n"
+
+    return formatted
+
+
 def format_definitions(definitions_list):
     def_str = ""
     for d in definitions_list:
@@ -53,11 +83,18 @@ def format_definitions(definitions_list):
     return def_str
 
 
-def build_batch_classification_prompt(batch_items, previous_sentence=None):
+def build_batch_classification_prompt(batch_items, previous_sentence=None, categories=None, definitions=None, few_shot_examples=None):
     """
     previous_sentence: the raw text of the sentence immediately before this
                        batch's first sentence. Used as context only — no label.
+    categories: list of target categories (defaults to CATEGORIES)
+    definitions: list of category definition dicts (defaults to DEFINITIONS)
+    few_shot_examples: list of few-shot example dicts (defaults to FEW_SHOT_EXAMPLES)
     """
+    target_categories = categories if categories is not None else CATEGORIES
+    target_definitions = definitions if definitions is not None else DEFINITIONS
+    target_examples = few_shot_examples if few_shot_examples is not None else FEW_SHOT_EXAMPLES
+
     # 1. Extract input sentences
     input_data_for_llm = []
     for item in batch_items:
@@ -72,9 +109,14 @@ def build_batch_classification_prompt(batch_items, previous_sentence=None):
 
     # 3. Build examples block
     examples_str = ""
-    if effective_strategy == "few_shot":
+    if effective_strategy == "crwiki":
+        examples_str = format_contrastive_examples(
+            CONTRASTIVE_EXAMPLES,
+            "Contrastive Examples"
+        )
+    elif effective_strategy == "few_shot":
         examples_str = format_examples(
-            FEW_SHOT_EXAMPLES,
+            target_examples,
             "Reference Examples",
             include_reasoning=is_cot
         )
@@ -89,8 +131,8 @@ def build_batch_classification_prompt(batch_items, previous_sentence=None):
     cot_block = f"\n{_COT_INSTRUCTION}\n" if is_cot else ""
 
     # 6. Assemble prompt
-    category_list_str = "\n".join([f"- {c}" for c in CATEGORIES])
-    definitions_str   = format_definitions(DEFINITIONS)
+    category_list_str = "\n".join([f"- {c}" for c in target_categories])
+    definitions_str   = format_definitions(target_definitions)
 
     prompt = f"""You are a data annotation expert. Classify each sentence below.
 
